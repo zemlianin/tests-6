@@ -1,4 +1,5 @@
 package org.example.clients;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.example.configurations.AppSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,11 +20,11 @@ public class AtlasClient {
         this.appSettings = appSettings;
     }
 
-    public Mono<Integer> GetTypeById() {
+    public Mono<String> GetAllTypes() {
         return webClient
                 .get()
                 .retrieve()
-                .bodyToMono(Integer.class)
+                .bodyToMono(String.class)
                 .retryWhen(Retry.fixedDelay(appSettings.retryAttempts,
                         Duration.ofMillis(appSettings.retryDelayMillis)));
     }

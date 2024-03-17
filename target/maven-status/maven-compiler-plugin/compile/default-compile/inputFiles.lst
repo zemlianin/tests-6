@@ -1,5 +1,8 @@
-E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\controllers\TypeController.java
+E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\configurations\JwtConverter.java
+E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\controllers\RoleController.java
 E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\Main.java
 E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\configurations\AppSettings.java
 E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\clients\AtlasClient.java
+E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\configurations\SecurityConfig.java
+E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\configurations\JwtConverterProperties.java
 E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\configurations\WebClientConfiguration.java

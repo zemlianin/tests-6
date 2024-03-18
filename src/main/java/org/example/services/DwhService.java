@@ -14,9 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.RejectedExecutionException;
 
 @Service
 public class DwhService {
@@ -46,11 +45,18 @@ public class DwhService {
         if (dwhList.isEmpty()) {
             throw new NoSuchElementException("All dwh were used");
         }
+
         var dwh = dwhList.stream().findFirst().get();
         dwhRepository.softUsedByName(dwh.getName());
         userRepository.softDwhByUserId(user.getId(), dwh);
+
+        if (!tryLinkRoleInKeycloak(dwh.getName())){
+            throw new RejectedExecutionException();
+        }
+
         return dwh;
     }
+
 
     public List<Dwh> getAll() {
         return dwhRepository.findAll();
@@ -68,12 +74,22 @@ public class DwhService {
         var jsonRole = objectMapper.writeValueAsString(role);
 
         System.out.println(jsonRole);
-       /* atlasAgentClient.AddNewRole(role)
+        var map = new TreeMap<>(Map.of(dwhName, role));
+
+        atlasAgentClient.AddNewRole(map)
                 .doOnNext(response -> {
                     System.out.println("Answer of server: " + response);
                 })
-                .block();*/
-        return new Dwh();
+                .block();
+        var dwh = new Dwh();
+        dwh.setName(dwhName);
+        dwh.setUsed(false);
+        return dwhRepository.save(dwh);
+    }
+
+    private Boolean tryLinkRoleInKeycloak(String role){
+        //TODO
+        return true;
     }
 
     private String generateNewDwhName() {

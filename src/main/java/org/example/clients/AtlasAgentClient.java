@@ -14,6 +14,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
+import java.util.Map;
 
 @Component
 public class AtlasAgentClient {
@@ -29,15 +30,15 @@ public class AtlasAgentClient {
         this.appSettings = appSettings;
     }
 
-    public Mono<String> AddNewRole(AtlasRole role) throws JsonProcessingException {
+    public Mono<String> AddNewRole(Map<String, AtlasRole> roles) throws JsonProcessingException {
         var objectMapper = new ObjectMapper();
-        var jsonRole = objectMapper.writeValueAsString(role);
+        var jsonRoles = objectMapper.writeValueAsString(roles);
 
         return atlasAgentClient
                 .post()
                 .uri(ROLE_ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(jsonRole))
+                .body(BodyInserters.fromValue(jsonRoles))
                 .retrieve()
                 .bodyToMono(String.class)
                 .retryWhen(Retry.fixedDelay(appSettings.retryAttempts,

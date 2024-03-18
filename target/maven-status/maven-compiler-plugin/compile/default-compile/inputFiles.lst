@@ -9,6 +9,7 @@ E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\models\entities\
 E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\configurations\security\SecurityConfig.java
 E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\repositories\DwhRepository.java
 E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\repositories\UserRepository.java
+E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\clients\KeycloakClient.java
 E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\models\entities\Dwh.java
 E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\configurations\client\WebClientConfiguration.java
 E:\Users\813544\source\repos\Meta-Api\src\main\java\org\example\controllers\AdminController.java

@@ -45,9 +45,27 @@ public class WebClientConfiguration {
                 .build();
     }
 
+
     @Bean
     @Qualifier("atlasAgentClient")
     public WebClient atlasAgentClientWithTimeout() {
+        final var tcpClient = TcpClient
+                .create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, TIMEOUT)
+                .doOnConnected(connection -> {
+                    connection.addHandlerLast(new ReadTimeoutHandler(TIMEOUT, TimeUnit.MILLISECONDS));
+                    connection.addHandlerLast(new WriteTimeoutHandler(TIMEOUT, TimeUnit.MILLISECONDS));
+                });
+
+        return WebClient.builder()
+                .baseUrl(ATLAS_AGENT_BASE_URL)
+                .clientConnector(new ReactorClientHttpConnector(HttpClient.from(tcpClient)))
+                .build();
+    }
+
+    @Bean
+    @Qualifier("keycloakClient")
+    public WebClient keycloakClientWithTimeout() {
         final var tcpClient = TcpClient
                 .create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, TIMEOUT)

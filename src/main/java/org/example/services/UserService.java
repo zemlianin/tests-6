@@ -14,7 +14,18 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User GetUserById(UUID uuid){
-        return userRepository.getById(uuid);
+    public User getOrCreateUserById(UUID uuid){
+        var userOptional = userRepository.findById(uuid);
+
+        if(userOptional.isEmpty()){
+            var newUser = new User(uuid);
+            return addUser(newUser);
+        } else {
+            return userOptional.get();
+        }
+    }
+
+    public User addUser(User user){
+        return userRepository.save(user);
     }
 }

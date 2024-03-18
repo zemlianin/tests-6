@@ -1,9 +1,9 @@
+org\example\controllers\DwhController.class
 org\example\repository\DwhRepository.class
 org\example\configurations\security\SecurityConfig.class
 org\example\services\DwhService.class
 org\example\configurations\security\JwtConverter.class
 org\example\models\entities\Dwh.class
-org\example\controllers\RoleController.class
 org\example\models\entities\User.class
 org\example\repository\UserRepository.class
 org\example\clients\AtlasClient.class

@@ -12,7 +12,17 @@ public class Dwh {
     @OneToMany()
     List<Dwh> users;
 
+    boolean isUsed;
+
     public Dwh() {
+    }
+
+    public boolean getUsed() {
+        return isUsed;
+    }
+
+    public void setUsed(boolean used) {
+        isUsed = used;
     }
 
     public String getName() {

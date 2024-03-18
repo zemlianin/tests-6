@@ -11,10 +11,14 @@ public class User {
     UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "dwh_name")
+    @JoinColumn(name = "dwh_name", nullable = true)
     Dwh dwh;
 
     public User() {
+    }
+
+    public User(UUID id) {
+        this.id = id;
     }
 
     public UUID getId() {

@@ -7,7 +7,10 @@ import org.springframework.stereotype.Component;
 public class AppSettings {
 
     @Value("${atlas.url}")
-    public String rateUrl;
+    public String atlasUrl;
+
+    @Value("${atlas.agent.url}")
+    public String atlasAgentUrl;
 
     @Value("${atlas_client.timeout}")
     public int timeout;

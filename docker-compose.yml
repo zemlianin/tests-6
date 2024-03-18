@@ -1,0 +1,27 @@
+version: '3.4'
+
+services:
+  mysql:
+    image: mysql:8.0.36
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: stage
+      MYSQL_USER: example
+      MYSQL_PASSWORD: secret2
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./dbdata:/var/lib/mysql
+    restart: always
+
+  meta-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./src/main/resources:/app/src/main/resources
+    ports:
+      - "8090:8080"
+    depends_on:
+      - mysql
+    restart: always

@@ -1,8 +1,10 @@
 org\example\clients\AtlasClient.class
-org\example\configurations\SecurityConfig.class
+org\example\configurations\security\SecurityConfig.class
 org\example\Main.class
-org\example\configurations\WebClientConfiguration.class
+org\example\configurations\security\JwtConverter.class
+org\example\configurations\security\JwtConverterProperties.class
+org\example\models\entities\Dwh.class
+org\example\configurations\client\WebClientConfiguration.class
 org\example\controllers\RoleController.class
+org\example\models\entities\User.class
 org\example\configurations\AppSettings.class
-org\example\configurations\JwtConverter.class
-org\example\configurations\JwtConverterProperties.class

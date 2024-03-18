@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,13 +47,14 @@ public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken>
     }
 
     private Collection<? extends GrantedAuthority> extractResourceRoles(Jwt jwt) {
-        Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
-        Map<String, Object> resource;
-        Collection<String> resourceRoles;
+        String resourceAccess = jwt.getClaim("azp");
+
+        Map<String, List<String>> realmAccess = jwt.getClaim("realm_access");
+        List<String> resourceRoles = realmAccess.get("roles");
 
         if (resourceAccess == null
-                || (resource = (Map<String, Object>) resourceAccess.get(properties.getResourceId())) == null
-                || (resourceRoles = (Collection<String>) resource.get("roles")) == null) {
+                || !resourceAccess.equals(properties.getResourceId())
+                || resourceRoles == null) {
             return Set.of();
         }
         return resourceRoles.stream()

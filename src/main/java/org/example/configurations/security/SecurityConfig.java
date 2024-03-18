@@ -23,7 +23,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((authz) ->
                 authz.requestMatchers(HttpMethod.GET, "/api/v1/dwh/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/dwh/").hasRole(ADMIN)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/admin/**").hasAuthority(ADMIN)
                         .anyRequest().authenticated());
 
         http.sessionManagement(sess -> sess.sessionCreationPolicy(

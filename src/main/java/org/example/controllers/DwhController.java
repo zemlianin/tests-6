@@ -9,10 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -31,12 +33,11 @@ public class DwhController {
     }
 
     @GetMapping("/ping")
-    public UUID ping() {
+    public Object ping() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        var jwt = (Jwt)(authentication.getCredentials());
-        String uuid = jwt.getClaim("sub");
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 
-        return UUID.fromString(uuid);
+        return authorities;
     }
 
     @PostMapping("/add_dwh")

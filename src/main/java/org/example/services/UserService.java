@@ -1,7 +1,7 @@
 package org.example.services;
 
 import org.example.models.entities.User;
-import org.example.repository.UserRepository;
+import org.example.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;

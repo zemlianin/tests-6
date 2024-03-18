@@ -19,12 +19,14 @@ import java.util.concurrent.TimeUnit;
 public class WebClientConfiguration {
     private static String ATLAS_BASE_URL;
     private static String ATLAS_AGENT_BASE_URL;
+    private static String KEYCLOAK_BASE_URL;
     public static int TIMEOUT;
 
     @Autowired
     public WebClientConfiguration(AppSettings appSettings) {
         ATLAS_BASE_URL = appSettings.atlasUrl;
         ATLAS_AGENT_BASE_URL = appSettings.atlasAgentUrl;
+        KEYCLOAK_BASE_URL = appSettings.keycloakUrl;
         TIMEOUT = appSettings.timeout;
     }
 
@@ -75,7 +77,7 @@ public class WebClientConfiguration {
                 });
 
         return WebClient.builder()
-                .baseUrl(ATLAS_AGENT_BASE_URL)
+                .baseUrl(KEYCLOAK_BASE_URL)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.from(tcpClient)))
                 .build();
     }

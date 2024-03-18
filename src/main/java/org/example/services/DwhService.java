@@ -1,9 +1,13 @@
 package org.example.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mysql.cj.exceptions.WrongArgumentException;
 import org.example.clients.AtlasAgentClient;
+import org.example.clients.KeycloakClient;
+import org.example.configurations.security.JwtConverterProperties;
+import org.example.models.dao.RoleRequest;
 import org.example.models.entities.Dwh;
 import org.example.models.entities.User;
 import org.example.repositories.DwhRepository;
@@ -23,15 +27,22 @@ public class DwhService {
     private final UserRepository userRepository;
     private final AtlasAgentClient atlasAgentClient;
     private final AtlasRoleFactory atlasRoleFactory;
+    private final KeycloakClient keycloakClient;
+    private final JwtConverterProperties jwtConverterProperties;
 
     public DwhService(DwhRepository dwhRepository,
                       UserRepository userRepository,
                       AtlasAgentClient atlasAgentClient,
-                      AtlasRoleFactory atlasRoleFactory) {
+                      AtlasRoleFactory atlasRoleFactory,
+                      KeycloakClient keycloakClient,
+                      JwtConverterProperties jwtConverterProperties) {
         this.userRepository = userRepository;
         this.dwhRepository = dwhRepository;
         this.atlasAgentClient = atlasAgentClient;
         this.atlasRoleFactory = atlasRoleFactory;
+        this.keycloakClient = keycloakClient;
+        this.jwtConverterProperties = jwtConverterProperties;
+
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -50,7 +61,7 @@ public class DwhService {
         dwhRepository.softUsedByName(dwh.getName());
         userRepository.softDwhByUserId(user.getId(), dwh);
 
-        if (!tryLinkRoleInKeycloak(dwh.getName())){
+        if (!tryLinkRoleInKeycloak(dwh.getName())) {
             throw new RejectedExecutionException();
         }
 
@@ -87,9 +98,22 @@ public class DwhService {
         return dwhRepository.save(dwh);
     }
 
-    private Boolean tryLinkRoleInKeycloak(String role){
-        //TODO
-        return true;
+    private Boolean tryLinkRoleInKeycloak(String role) {
+        try {
+            var tokens = keycloakClient.auth(jwtConverterProperties.getResourceId(),
+                    jwtConverterProperties.getUsername(),
+                    jwtConverterProperties.getPassword()).block();
+
+            var objectMapper = new ObjectMapper();
+
+            var jsonNode = objectMapper.readTree(tokens);
+            var accessToken = jsonNode.get("access_token").toString().replace("\"","");
+            keycloakClient.createRole(accessToken, new RoleRequest(role, "", false)).block();
+
+            return true;
+        } catch (Exception e){
+            return false;
+        }
     }
 
     private String generateNewDwhName() {

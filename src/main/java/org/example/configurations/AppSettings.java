@@ -12,6 +12,9 @@ public class AppSettings {
     @Value("${atlas.agent.url}")
     public String atlasAgentUrl;
 
+    @Value("${keycloak.url}")
+    public String keycloakUrl;
+
     @Value("${atlas_client.timeout}")
     public int timeout;
 

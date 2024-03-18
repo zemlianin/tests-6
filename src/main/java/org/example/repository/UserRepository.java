@@ -1,7 +1,9 @@
 package org.example.repository;
 
-import org.springframework.stereotype.Repository;
+import org.example.models.entities.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Repository
-public class UserRepository {
+import java.util.UUID;
+
+public interface UserRepository extends JpaRepository<User, UUID> {
 }

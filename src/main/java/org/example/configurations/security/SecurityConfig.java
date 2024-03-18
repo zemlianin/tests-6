@@ -1,6 +1,5 @@
 package org.example.configurations.security;
 
-import org.example.configurations.security.JwtConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

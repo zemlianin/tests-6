@@ -1,7 +1,7 @@
 package org.example.repository;
 
-import org.springframework.stereotype.Repository;
+import org.example.models.entities.Dwh;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Repository
-public class DwhRepository {
+public interface DwhRepository  extends JpaRepository<Dwh, String> {
 }

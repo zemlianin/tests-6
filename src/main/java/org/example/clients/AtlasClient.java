@@ -1,8 +1,6 @@
 package org.example.clients;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.example.configurations.AppSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;

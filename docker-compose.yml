@@ -13,14 +13,14 @@ services:
     volumes:
       - ./dbdata:/var/lib/mysql
 
-  meta-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - ./src/main/resources:/app/src/main/resources
-    ports:
-      - "8090:8080"
-    depends_on:
-      - mysql
-    restart: always
+#  meta-api:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    volumes:
+#      - ./src/main/resources:/app/src/main/resources
+#    ports:
+#      - "8090:8080"
+#    depends_on:
+#     - mysql
+#    restart: always

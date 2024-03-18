@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   mysql:
-    image: mysql:8.0.36
+    image: mysql:latest
     environment:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: stage
@@ -12,7 +12,6 @@ services:
       - "3306:3306"
     volumes:
       - ./dbdata:/var/lib/mysql
-    restart: always
 
   meta-api:
     build:
@@ -23,5 +22,5 @@ services:
     ports:
       - "8090:8080"
     depends_on:
-      - mysql
+      - postgresql
     restart: always

@@ -1,10 +1,12 @@
-org\example\clients\AtlasClient.class
+org\example\repository\DwhRepository.class
 org\example\configurations\security\SecurityConfig.class
-org\example\Main.class
 org\example\configurations\security\JwtConverter.class
-org\example\configurations\security\JwtConverterProperties.class
 org\example\models\entities\Dwh.class
-org\example\configurations\client\WebClientConfiguration.class
 org\example\controllers\RoleController.class
 org\example\models\entities\User.class
+org\example\repository\UserRepository.class
+org\example\clients\AtlasClient.class
+org\example\Main.class
+org\example\configurations\security\JwtConverterProperties.class
+org\example\configurations\client\WebClientConfiguration.class
 org\example\configurations\AppSettings.class

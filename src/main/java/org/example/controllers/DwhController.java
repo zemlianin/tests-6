@@ -52,9 +52,9 @@ public class DwhController {
 
             return new ResponseEntity<>(new DwhResponse(dwh), HttpStatus.CREATED);
         } catch (WrongArgumentException e){
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().build();
         } catch (NoSuchElementException e){
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.notFound().build();
         }
     }
 }

@@ -7,6 +7,7 @@ import com.mysql.cj.exceptions.WrongArgumentException;
 import org.example.clients.AtlasAgentClient;
 import org.example.clients.KeycloakClient;
 import org.example.configurations.security.JwtConverterProperties;
+import org.example.models.dao.KeycloakRole;
 import org.example.models.dao.RoleRequest;
 import org.example.models.entities.Dwh;
 import org.example.models.entities.User;
@@ -61,7 +62,7 @@ public class DwhService {
         dwhRepository.softUsedByName(dwh.getName());
         userRepository.softDwhByUserId(user.getId(), dwh);
 
-        if (!tryLinkRoleInKeycloak(dwh.getName())) {
+        if (!tryLinkRoleInKeycloak(user, dwh.getName())) {
             throw new RejectedExecutionException();
         }
 
@@ -98,7 +99,7 @@ public class DwhService {
         return dwhRepository.save(dwh);
     }
 
-    private Boolean tryLinkRoleInKeycloak(String role) {
+    private Boolean tryLinkRoleInKeycloak(User user, String role) {
         try {
             var tokens = keycloakClient.auth(jwtConverterProperties.getResourceId(),
                     jwtConverterProperties.getUsername(),
@@ -107,11 +108,14 @@ public class DwhService {
             var objectMapper = new ObjectMapper();
 
             var jsonNode = objectMapper.readTree(tokens);
-            var accessToken = jsonNode.get("access_token").toString().replace("\"","");
+            var accessToken = jsonNode.get("access_token").toString().replace("\"", "");
             keycloakClient.createRole(accessToken, new RoleRequest(role, "", false)).block();
 
+            var keycloakRole = keycloakClient.getRoleByName(accessToken, role).block();
+
+            keycloakClient.linkRoleWithUser(accessToken, user, keycloakRole).block();
             return true;
-        } catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
     }

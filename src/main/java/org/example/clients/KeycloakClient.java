@@ -1,6 +1,7 @@
 package org.example.clients;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.configurations.AppSettings;
 import org.example.models.dao.KeycloakRole;
@@ -8,6 +9,7 @@ import org.example.models.dao.RoleRequest;
 import org.example.models.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -18,6 +20,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
+import java.util.List;
 
 @Component
 public class KeycloakClient {
@@ -73,12 +76,13 @@ public class KeycloakClient {
                         Duration.ofMillis(appSettings.retryDelayMillis)));
     }
 
-    public Mono<String> linkRoleWithUser(User user, KeycloakRole role) throws JsonProcessingException {
+    public Mono<String> linkRoleWithUser(String adminAccessToken, User user, List<KeycloakRole> role) throws JsonProcessingException {
         var uri = "/admin/realms/auth/users/" + user.getId() +
                 "/role-mappings/realm";
 
         var headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(adminAccessToken);
         var objectMapper = new ObjectMapper();
 
         var requestBody = objectMapper.writeValueAsString(role);
@@ -94,7 +98,7 @@ public class KeycloakClient {
                         Duration.ofMillis(appSettings.retryDelayMillis)));
     }
 
-    public Mono<KeycloakRole> getRoleByName(String adminAccessToken, String name) throws JsonProcessingException {
+    public Mono<List<KeycloakRole>> getRoleByName(String adminAccessToken, String name) throws JsonProcessingException {
         var headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(adminAccessToken);
@@ -108,7 +112,7 @@ public class KeycloakClient {
                 .uri(uriWithParams)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .retrieve()
-                .bodyToMono(KeycloakRole.class)
+                .bodyToMono(new ParameterizedTypeReference<List<KeycloakRole>>() {})
                 .retryWhen(Retry.fixedDelay(appSettings.retryAttempts,
                         Duration.ofMillis(appSettings.retryDelayMillis)));
     }

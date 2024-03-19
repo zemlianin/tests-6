@@ -3,7 +3,9 @@ package org.example.clients;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.configurations.AppSettings;
+import org.example.models.dao.KeycloakRole;
 import org.example.models.dao.RoleRequest;
+import org.example.models.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -11,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
@@ -24,6 +27,7 @@ public class KeycloakClient {
 
     private static final String AUTH_ENDPOINT = "/realms/auth/protocol/openid-connect/token";
     private static final String ADD_ROLE_ENDPOINT = "/admin/realms/auth/roles";
+    private static final String GET_ROLE_ENDPOINT = "/admin/realms/auth/roles";
 
     @Autowired
     public KeycloakClient(@Qualifier("keycloakClient") WebClient keycloakClient, AppSettings appSettings) {
@@ -57,10 +61,7 @@ public class KeycloakClient {
 
         var objectMapper = new ObjectMapper();
 
-        String requestBody;
-
-
-        requestBody = objectMapper.writeValueAsString(request);
+        var requestBody = objectMapper.writeValueAsString(request);
 
         return keycloakClient.post()
                 .uri(ADD_ROLE_ENDPOINT)
@@ -68,6 +69,46 @@ public class KeycloakClient {
                 .body(BodyInserters.fromValue(requestBody))
                 .retrieve()
                 .bodyToMono(String.class)
+                .retryWhen(Retry.fixedDelay(appSettings.retryAttempts,
+                        Duration.ofMillis(appSettings.retryDelayMillis)));
+    }
+
+    public Mono<String> linkRoleWithUser(User user, KeycloakRole role) throws JsonProcessingException {
+        var uri = "/admin/realms/auth/users/" + user.getId() +
+                "/role-mappings/realm";
+
+        var headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        var objectMapper = new ObjectMapper();
+
+        var requestBody = objectMapper.writeValueAsString(role);
+
+        return keycloakClient
+                .post()
+                .uri(uri)
+                .headers(httpHeaders -> httpHeaders.addAll(headers))
+                .body(BodyInserters.fromValue(requestBody))
+                .retrieve()
+                .bodyToMono(String.class)
+                .retryWhen(Retry.fixedDelay(appSettings.retryAttempts,
+                        Duration.ofMillis(appSettings.retryDelayMillis)));
+    }
+
+    public Mono<KeycloakRole> getRoleByName(String adminAccessToken, String name) throws JsonProcessingException {
+        var headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(adminAccessToken);
+
+        var uriWithParams = UriComponentsBuilder.fromUriString(GET_ROLE_ENDPOINT)
+                .queryParam("search", name)
+                .build()
+                .toUriString();
+
+        return keycloakClient.get()
+                .uri(uriWithParams)
+                .headers(httpHeaders -> httpHeaders.addAll(headers))
+                .retrieve()
+                .bodyToMono(KeycloakRole.class)
                 .retryWhen(Retry.fixedDelay(appSettings.retryAttempts,
                         Duration.ofMillis(appSettings.retryDelayMillis)));
     }

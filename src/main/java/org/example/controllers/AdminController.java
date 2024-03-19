@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/admin")
 public class AdminController {
@@ -23,7 +25,7 @@ public class AdminController {
     @PostMapping("/generate_dwh_role")
     public ResponseEntity<DwhResponse> generateDwh() throws JsonProcessingException {
         try {
-            var dwh = dwhService.generateDwh();
+            var dwh = dwhService.generateDwh(1).get(0);
 
             return new ResponseEntity<>(new DwhResponse(dwh), HttpStatus.CREATED);
         } catch (JsonProcessingException e) {

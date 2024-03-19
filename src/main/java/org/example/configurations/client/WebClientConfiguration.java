@@ -22,6 +22,8 @@ public class WebClientConfiguration {
     private static String KEYCLOAK_BASE_URL;
     public static int TIMEOUT;
 
+    public static int RESTART_TIMEOUT_MILLIS = 300000;
+
     @Autowired
     public WebClientConfiguration(AppSettings appSettings) {
         ATLAS_BASE_URL = appSettings.atlasUrl;
@@ -57,6 +59,23 @@ public class WebClientConfiguration {
                 .doOnConnected(connection -> {
                     connection.addHandlerLast(new ReadTimeoutHandler(TIMEOUT, TimeUnit.MILLISECONDS));
                     connection.addHandlerLast(new WriteTimeoutHandler(TIMEOUT, TimeUnit.MILLISECONDS));
+                });
+
+        return WebClient.builder()
+                .baseUrl(ATLAS_AGENT_BASE_URL)
+                .clientConnector(new ReactorClientHttpConnector(HttpClient.from(tcpClient)))
+                .build();
+    }
+
+    @Bean
+    @Qualifier("atlasAgentRestartClient")
+    public WebClient atlasAgentRestartClientWithTimeout() {
+        final var tcpClient = TcpClient
+                .create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, TIMEOUT)
+                .doOnConnected(connection -> {
+                    connection.addHandlerLast(new ReadTimeoutHandler(RESTART_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
+                    connection.addHandlerLast(new WriteTimeoutHandler(RESTART_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
                 });
 
         return WebClient.builder()

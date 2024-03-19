@@ -12,8 +12,7 @@ public interface DwhRepository  extends JpaRepository<Dwh, String> {
     Optional<Dwh> findByName(String name);
 
     @Query("SELECT d FROM Dwh d WHERE d.isUsed = false")
-    List<Dwh> findFirstByIsUsedFalse();
-
+    List<Dwh> findAllByIsUsedFalse();
 
     @Modifying
     @Query("UPDATE Dwh d SET d.isUsed = true WHERE d.name = :name AND d.isUsed = false")

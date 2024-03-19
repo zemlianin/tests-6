@@ -1,18 +1,19 @@
 package org.example.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mysql.cj.exceptions.WrongArgumentException;
 import org.example.clients.AtlasAgentClient;
 import org.example.clients.KeycloakClient;
+import org.example.configurations.AppSettings;
 import org.example.configurations.security.JwtConverterProperties;
-import org.example.models.dao.KeycloakRole;
+import org.example.models.atlas.AtlasRole;
 import org.example.models.dao.RoleRequest;
 import org.example.models.entities.Dwh;
 import org.example.models.entities.User;
 import org.example.repositories.DwhRepository;
 import org.example.repositories.UserRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,19 +31,22 @@ public class DwhService {
     private final AtlasRoleFactory atlasRoleFactory;
     private final KeycloakClient keycloakClient;
     private final JwtConverterProperties jwtConverterProperties;
+    private final AppSettings appSettings;
 
     public DwhService(DwhRepository dwhRepository,
                       UserRepository userRepository,
                       AtlasAgentClient atlasAgentClient,
                       AtlasRoleFactory atlasRoleFactory,
                       KeycloakClient keycloakClient,
-                      JwtConverterProperties jwtConverterProperties) {
+                      JwtConverterProperties jwtConverterProperties,
+                      AppSettings appSettings) {
         this.userRepository = userRepository;
         this.dwhRepository = dwhRepository;
         this.atlasAgentClient = atlasAgentClient;
         this.atlasRoleFactory = atlasRoleFactory;
         this.keycloakClient = keycloakClient;
         this.jwtConverterProperties = jwtConverterProperties;
+        this.appSettings = appSettings;
 
     }
 
@@ -52,7 +56,7 @@ public class DwhService {
             throw new WrongArgumentException("User already has DWH");
         }
 
-        var dwhList = dwhRepository.findFirstByIsUsedFalse();
+        var dwhList = dwhRepository.findAllByIsUsedFalse();
 
         if (dwhList.isEmpty()) {
             throw new NoSuchElementException("All dwh were used");
@@ -74,29 +78,38 @@ public class DwhService {
         return dwhRepository.findAll();
     }
 
-    public Dwh generateDwh() throws JsonProcessingException {
-        var dwhName = generateNewDwhName();
-        var allPermissionRegex = "^(?=" + dwhName + ").+";
-        var readPermissionsRegex = "^(?!DWH_).+";
-        var role = atlasRoleFactory.createDefaultDwhRole(
-                allPermissionRegex,
-                readPermissionsRegex);
+    public List<Dwh> generateDwh(int count) throws JsonProcessingException {
+        var map = new TreeMap<String, AtlasRole>();
+        ArrayList<Dwh> list = new ArrayList<Dwh>();
 
-        var objectMapper = new ObjectMapper();
-        var jsonRole = objectMapper.writeValueAsString(role);
+        for (int i = 0; i < count; i++){
+            var dwhName = generateNewDwhName();
+            var allPermissionRegex = "^(?=" + dwhName + ").+";
+            var readPermissionsRegex = "^(?!DWH_).+";
+            var role = atlasRoleFactory.createDefaultDwhRole(
+                    allPermissionRegex,
+                    readPermissionsRegex);
 
-        System.out.println(jsonRole);
-        var map = new TreeMap<>(Map.of(dwhName, role));
+            var objectMapper = new ObjectMapper();
+            var jsonRole = objectMapper.writeValueAsString(role);
+
+            System.out.println(jsonRole);
+            map.put(dwhName, role);
+
+            var dwh = new Dwh();
+            dwh.setName(dwhName);
+            dwh.setUsed(false);
+
+            list.add(dwh);
+        }
 
         atlasAgentClient.AddNewRole(map)
                 .doOnNext(response -> {
                     System.out.println("Answer of server: " + response);
                 })
                 .block();
-        var dwh = new Dwh();
-        dwh.setName(dwhName);
-        dwh.setUsed(false);
-        return dwhRepository.save(dwh);
+
+        return dwhRepository.saveAll(list);
     }
 
     private Boolean tryLinkRoleInKeycloak(User user, String role) {
@@ -146,5 +159,19 @@ public class DwhService {
             hexString.append(hex);
         }
         return hexString.toString();
+    }
+
+    @Scheduled(cron = "${interval-in-cron}")
+    public void dailyGenerateNewRoles() throws JsonProcessingException {
+        var allDwh = dwhRepository.findAll();
+        var notUsingDwh = dwhRepository.findAllByIsUsedFalse();
+
+        if(notUsingDwh.size() / (double)allDwh.size() > appSettings.rolesNotUsePart){
+            return;
+        }
+        var count = allDwh.size();
+        generateDwh(count);
+
+        atlasAgentClient.restartAtlas().block();
     }
 }

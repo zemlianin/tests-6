@@ -23,4 +23,7 @@ public class AppSettings {
 
     @Value("${atlas_client.retry_delay_millis}")
     public int retryDelayMillis;
+
+    @Value("${roles.not.use.part}")
+    public double rolesNotUsePart;
 }

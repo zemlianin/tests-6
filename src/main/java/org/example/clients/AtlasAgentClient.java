@@ -20,12 +20,18 @@ import java.util.Map;
 public class AtlasAgentClient {
     private final WebClient atlasAgentClient;
 
+    private final WebClient atlasAgentRestartClient;
+
     private final AppSettings appSettings;
 
     private static final String ROLE_ENDPOINT = "/add_role";
+    private static final String RESTART_ENDPOINT = "/commit";
 
     @Autowired
-    public AtlasAgentClient(@Qualifier("atlasAgentClient") WebClient atlasAgentClient, AppSettings appSettings) {
+    public AtlasAgentClient(@Qualifier("atlasAgentClient") WebClient atlasAgentClient,
+                            @Qualifier("atlasAgentRestartClient") WebClient atlasAgentRestartClient,
+                            AppSettings appSettings) {
+        this.atlasAgentRestartClient = atlasAgentRestartClient;
         this.atlasAgentClient = atlasAgentClient;
         this.appSettings = appSettings;
     }
@@ -43,5 +49,15 @@ public class AtlasAgentClient {
                 .bodyToMono(String.class)
                 .retryWhen(Retry.fixedDelay(appSettings.retryAttempts,
                         Duration.ofMillis(appSettings.retryDelayMillis)));
+    }
+
+    public Mono<String> restartAtlas(){
+        return atlasAgentRestartClient
+                .get()
+                .uri(RESTART_ENDPOINT)
+                .retrieve()
+                .bodyToMono(String.class)
+                .retryWhen(Retry.fixedDelay(1,
+                        Duration.ofMillis(300000)));
     }
 }

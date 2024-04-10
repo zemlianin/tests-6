@@ -22,7 +22,7 @@ public class WebClientConfiguration {
     private static String KEYCLOAK_BASE_URL;
     public static int TIMEOUT;
 
-    public static int RESTART_TIMEOUT_MILLIS = 300000;
+    public static int LONG_TIMEOUT_MILLIS = 300000;
 
     @Autowired
     public WebClientConfiguration(AppSettings appSettings) {
@@ -39,8 +39,8 @@ public class WebClientConfiguration {
                 .create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, TIMEOUT)
                 .doOnConnected(connection -> {
-                    connection.addHandlerLast(new ReadTimeoutHandler(TIMEOUT, TimeUnit.MILLISECONDS));
-                    connection.addHandlerLast(new WriteTimeoutHandler(TIMEOUT, TimeUnit.MILLISECONDS));
+                    connection.addHandlerLast(new ReadTimeoutHandler(LONG_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
+                    connection.addHandlerLast(new WriteTimeoutHandler(LONG_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
                 });
 
         return WebClient.builder()
@@ -48,7 +48,6 @@ public class WebClientConfiguration {
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.from(tcpClient)))
                 .build();
     }
-
 
     @Bean
     @Qualifier("atlasAgentClient")
@@ -74,8 +73,8 @@ public class WebClientConfiguration {
                 .create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, TIMEOUT)
                 .doOnConnected(connection -> {
-                    connection.addHandlerLast(new ReadTimeoutHandler(RESTART_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
-                    connection.addHandlerLast(new WriteTimeoutHandler(RESTART_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
+                    connection.addHandlerLast(new ReadTimeoutHandler(LONG_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
+                    connection.addHandlerLast(new WriteTimeoutHandler(LONG_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
                 });
 
         return WebClient.builder()

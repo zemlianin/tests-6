@@ -30,6 +30,7 @@ public class KeycloakClient {
     private static final String AUTH_ENDPOINT = "/realms/auth/protocol/openid-connect/token";
     private static final String ADD_ROLE_ENDPOINT = "/admin/realms/auth/roles";
     private static final String GET_ROLE_ENDPOINT = "/admin/realms/auth/roles";
+    private static final String GET_USER_ENDPOINT = "/admin/realms/auth/users";
 
     @Autowired
     public KeycloakClient(@Qualifier("keycloakClient") WebClient keycloakClient, AppSettings appSettings) {
@@ -112,6 +113,25 @@ public class KeycloakClient {
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<KeycloakRole>>() {})
+                .retryWhen(Retry.fixedDelay(appSettings.retryAttempts,
+                        Duration.ofMillis(appSettings.retryDelayMillis)));
+    }
+
+    public Mono<String> getUserByUsername(String adminAccessToken, String name) {
+        var headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(adminAccessToken);
+
+        var uriWithParams = UriComponentsBuilder.fromUriString(GET_USER_ENDPOINT)
+                .queryParam("username", name)
+                .build()
+                .toUriString();
+
+        return keycloakClient.get()
+                .uri(uriWithParams)
+                .headers(httpHeaders -> httpHeaders.addAll(headers))
+                .retrieve()
+                .bodyToMono(String.class)
                 .retryWhen(Retry.fixedDelay(appSettings.retryAttempts,
                         Duration.ofMillis(appSettings.retryDelayMillis)));
     }

@@ -3,6 +3,7 @@ package org.example.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mysql.cj.exceptions.WrongArgumentException;
 import org.example.models.dao.DwhResponse;
+import org.example.models.enums.PermissionLevel;
 import org.example.services.DwhService;
 import org.example.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/dwh")
@@ -54,6 +54,24 @@ public class DwhController {
             return ResponseEntity.badRequest().build();
         } catch (NoSuchElementException e){
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/add_user_to_dwh")
+    public ResponseEntity<DwhResponse> addUserToDwh(@RequestParam String username, @RequestParam String permissionLevel) throws JsonProcessingException {
+        try {
+            final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            var jwt = (Jwt)(authentication.getCredentials());
+            var uuid = UUID.fromString(jwt.getClaim("sub"));
+            var dwhOwner = userService.getOrCreateUserById(uuid);
+            var user = userService.getOrCreateUserByUsername(username);
+
+            var dwh = dwhService.linkUserToExistDwh(user, dwhOwner, PermissionLevel.valueOf(permissionLevel) );
+            return new ResponseEntity<>(new DwhResponse(dwh), HttpStatus.OK);
+        } catch (IllegalArgumentException | NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (WrongArgumentException e){
+            return ResponseEntity.badRequest().build();
         }
     }
 }

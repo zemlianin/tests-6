@@ -1,6 +1,6 @@
 package org.example.models.enums;
 
-public enum DwhRole {
+public enum PermissionLevel {
     ADMIN,
     ARCHITECT,
     DATA_STEWARD,

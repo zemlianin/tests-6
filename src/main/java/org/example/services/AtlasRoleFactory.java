@@ -13,14 +13,48 @@ public class AtlasRoleFactory {
         var adminPermissions = createDefaultAdminPermissions();
 
         var entityPermissions = createDefaultEntityPermissions(
+                ".*",
+                ".*read.*",
                 fieldsWithAllPermission,
                 fieldsWithReadPermission);
 
         var relationshipPermissions = createDefaultRelationshipPermissions(
+                ".*",
+                ".*read.*",
                 fieldsWithAllPermission,
                 fieldsWithReadPermission);
 
         var typePermissions = createDefaultTypePermissions(
+                ".*",
+                ".*read.*",
+                fieldsWithAllPermission,
+                fieldsWithReadPermission);
+
+        return new AtlasRole(adminPermissions,
+                typePermissions,
+                entityPermissions,
+                relationshipPermissions);
+    }
+
+    public AtlasRole createOnlyReadDwhRole(String fieldsWithAllPermission,
+                                          String fieldsWithReadPermission) {
+        var adminPermissions = createDefaultAdminPermissions();
+
+        var entityPermissions = createDefaultEntityPermissions(
+                ".*read.*",
+                ".*read.*",
+                fieldsWithAllPermission,
+                fieldsWithReadPermission);
+
+        var relationshipPermissions = createDefaultRelationshipPermissions(
+                ".*read.*",
+                ".*read.*",
+                fieldsWithAllPermission,
+                fieldsWithReadPermission);
+
+        var typePermissions = createDefaultTypePermissions(
+                ".*read.*",
+                ".*read.*",
                 fieldsWithAllPermission,
                 fieldsWithReadPermission);
 
@@ -38,11 +72,13 @@ public class AtlasRoleFactory {
         return list;
     }
 
-    private List<EntityPermission> createDefaultEntityPermissions(String fieldsWithAllPermission,
+    private List<EntityPermission> createDefaultEntityPermissions(String firstPermissions,
+                                                                  String secondPermissions,
+                                                                  String fieldsWithAllPermission,
                                                                   String fieldsWithReadPermission) {
         var firstEntityPermission = new EntityPermission();
 
-        firstEntityPermission.setPrivileges(List.of(".*"));
+        firstEntityPermission.setPrivileges(List.of(firstPermissions));
         firstEntityPermission.setEntityTypes(List.of(fieldsWithAllPermission));
         firstEntityPermission.setEntityIds(List.of(".*"));
         firstEntityPermission.setClassifications(List.of(fieldsWithAllPermission));
@@ -53,7 +89,7 @@ public class AtlasRoleFactory {
 
         var secondEntityPermission = new EntityPermission();
 
-        secondEntityPermission.setPrivileges(List.of(".*read.*"));
+        secondEntityPermission.setPrivileges(List.of(secondPermissions));
         secondEntityPermission.setEntityTypes(List.of(fieldsWithReadPermission));
         secondEntityPermission.setEntityIds(List.of(".*"));
         secondEntityPermission.setClassifications(List.of(fieldsWithReadPermission));
@@ -65,11 +101,13 @@ public class AtlasRoleFactory {
         return new ArrayList<>(List.of(firstEntityPermission, secondEntityPermission));
     }
 
-    private List<RelationshipPermission> createDefaultRelationshipPermissions(String fieldsWithAllPermission,
+    private List<RelationshipPermission> createDefaultRelationshipPermissions(String firstPermissions,
+                                                                              String secondPermissions,
+                                                                              String fieldsWithAllPermission,
                                                                               String fieldsWithReadPermission) {
         var firstRelationshipPermission = new RelationshipPermission();
 
-        firstRelationshipPermission.setPrivileges(List.of(".*"));
+        firstRelationshipPermission.setPrivileges(List.of(firstPermissions));
         firstRelationshipPermission.setRelationshipTypes(List.of(fieldsWithAllPermission));
         firstRelationshipPermission.setEnd1EntityType(List.of(fieldsWithAllPermission));
         firstRelationshipPermission.setEnd1EntityId(List.of(".*"));
@@ -80,7 +118,7 @@ public class AtlasRoleFactory {
 
         var secondRelationshipPermission = new RelationshipPermission();
 
-        secondRelationshipPermission.setPrivileges(List.of(".*read.*"));
+        secondRelationshipPermission.setPrivileges(List.of(secondPermissions));
         secondRelationshipPermission.setRelationshipTypes(List.of(fieldsWithReadPermission));
         secondRelationshipPermission.setEnd1EntityType(List.of(fieldsWithReadPermission));
         secondRelationshipPermission.setEnd1EntityId(List.of(".*"));
@@ -92,15 +130,17 @@ public class AtlasRoleFactory {
         return new ArrayList<>(List.of(firstRelationshipPermission, secondRelationshipPermission));
     }
 
-    private List<TypePermission> createDefaultTypePermissions(String fieldsWithAllPermission,
+    private List<TypePermission> createDefaultTypePermissions(String firstPermissions,
+                                                              String secondPermissions,
+                                                              String fieldsWithAllPermission,
                                                               String fieldsWithReadPermission) {
         var firstTypePermission = new TypePermission();
-        firstTypePermission.setPrivileges(List.of(".*"));
+        firstTypePermission.setPrivileges(List.of(firstPermissions));
         firstTypePermission.setTypeCategories(List.of(".*"));
         firstTypePermission.setTypeNames(List.of(fieldsWithAllPermission));
 
         var secondTypePermission = new TypePermission();
-        secondTypePermission.setPrivileges(List.of(".*read.*"));
+        secondTypePermission.setPrivileges(List.of(secondPermissions));
         secondTypePermission.setTypeCategories(List.of(".*"));
         secondTypePermission.setTypeNames(List.of(fieldsWithReadPermission));
 

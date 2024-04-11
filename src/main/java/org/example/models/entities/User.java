@@ -2,6 +2,7 @@ package org.example.models.entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
+import org.example.models.enums.DwhRole;
 
 import java.util.UUID;
 
@@ -13,6 +14,9 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "dwh_name", nullable = true)
     Dwh dwh;
+
+    @Enumerated(EnumType.ORDINAL)
+    private DwhRole dwhRole;
 
     public User() {
     }

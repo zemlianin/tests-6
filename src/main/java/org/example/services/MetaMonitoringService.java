@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.clients.AtlasClient;
 import org.example.clients.KeycloakClient;
 import org.example.configurations.security.JwtConverterProperties;
-import org.example.models.atlas.AtlasTypeResponse;
 import org.example.models.entities.AtlasType;
 import org.example.repositories.AtlasTypeRepository;
 import org.springframework.scheduling.annotation.Scheduled;

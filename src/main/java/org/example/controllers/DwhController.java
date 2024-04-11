@@ -49,7 +49,6 @@ public class DwhController {
 
             var user = userService.getOrCreateUserById(uuid);
             var dwh = dwhService.linkDwh(user);
-
             return new ResponseEntity<>(new DwhResponse(dwh), HttpStatus.CREATED);
         } catch (WrongArgumentException e){
             return ResponseEntity.badRequest().build();

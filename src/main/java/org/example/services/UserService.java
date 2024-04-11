@@ -49,7 +49,7 @@ public class UserService {
 
         var userJson = keycloakClient.getUserByUsername(accessToken, name).block();
         var userJsonNode = objectMapper.readTree(userJson);
-        var userId = userJsonNode.get(0).get("id").toString();
+        var userId = userJsonNode.get(0).get("id").toString().replace("\"","");
 
        return getOrCreateUserById(UUID.fromString(userId));
     }

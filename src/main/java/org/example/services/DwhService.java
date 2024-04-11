@@ -70,14 +70,17 @@ public class DwhService {
 
         var dwh = dwhList.stream().findFirst().get();
         dwhRepository.softUsedByName(dwh.getName());
-        userRepository.softDwhByUserId(user.getId(), dwh);
         var roles = dwh.getRoles();
         var targetRole = roles.stream().filter(r -> r.getPermissionLevel().equals(PermissionLevel.ADMIN)).findFirst().get();
+
 
         if (!tryLinkRoleInKeycloak(user, targetRole.getName())) {
             throw new RejectedExecutionException();
         }
 
+        user.setRole(targetRole);
+        user.setDwh(dwh);
+        userRepository.save(user);
         return dwh;
     }
 
@@ -109,8 +112,8 @@ public class DwhService {
 
     public List<Dwh> generateDwh(int count) throws JsonProcessingException {
         var map = new TreeMap<String, AtlasRole>();
-        ArrayList<Dwh> dwhList = new ArrayList<>();
-        ArrayList<Role> roleList = new ArrayList<>();
+        var dwhList = new ArrayList<Dwh>();
+        var roleList = new ArrayList<Role>();
 
         for (int i = 0; i < count; i++) {
             var dwhName = generateNewDwhName();
@@ -137,6 +140,7 @@ public class DwhService {
             adminRoleEntity.setName(dwhName);
             adminRoleEntity.setPermissionLevel(PermissionLevel.ADMIN);
             dataScientistRoleEntity.setName(dwhName + "_DATA_SCIENTIST");
+            dataScientistRoleEntity.setPermissionLevel(PermissionLevel.DATA_SCIENTIST);
 
             dwh.setRoles(List.of(adminRoleEntity, dataScientistRoleEntity));
 

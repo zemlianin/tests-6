@@ -162,9 +162,11 @@ public class DwhService {
 
     private Boolean tryLinkRoleInKeycloak(User user, String role) {
         try {
-            var tokens = keycloakClient.auth(jwtConverterProperties.getResourceId(),
+            var tokens2 = keycloakClient.auth(jwtConverterProperties.getResourceId(),
                     jwtConverterProperties.getUsername(),
-                    jwtConverterProperties.getPassword()).block();
+                    jwtConverterProperties.getPassword());
+
+                    var tokens = tokens2.block();
 
             var objectMapper = new ObjectMapper();
 
@@ -181,7 +183,7 @@ public class DwhService {
         }
     }
 
-    private String generateNewDwhName() {
+    String generateNewDwhName() {
         try {
             var random = new Random();
             var sha = generateSHA256(Long.toString(random.nextLong()));

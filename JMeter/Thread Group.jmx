@@ -1,0 +1,6 @@
+# JMeter generated Header file
+client_id	dwh-manager
+username	admin
+password	admin
+grant_type	password
+Content-Type	application/x-www-form-urlencoded

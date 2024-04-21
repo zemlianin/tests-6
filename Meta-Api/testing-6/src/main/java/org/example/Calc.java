@@ -14,6 +14,7 @@ public class Calc {
             sIn = opn(sIn);
             System.out.println(calculate(sIn));
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println(e.getMessage());
         }
     }
@@ -24,6 +25,7 @@ public class Calc {
      * @return Выходная строка в обратной польской нотации
      */
     public static String opn(String sIn) throws CalcException {
+
         StringBuilder sbStack = new StringBuilder(), sbOut = new StringBuilder();
         char cIn, cTmp;
 
@@ -45,6 +47,11 @@ public class Calc {
             } else if ('(' == cIn) {
                 sbStack.append(cIn);
             } else if (')' == cIn) {
+                /////////////
+                if(sbStack.length() == 1){
+                    throw new CalcException("Ошибка разбора скобок. Проверьте правильность выражения.");
+                }
+                ////////////
                 cTmp = sbStack.substring(sbStack.length()-1).charAt(0);
                 while ('(' != cTmp) {
                     if (sbStack.length() < 1) {
@@ -81,6 +88,7 @@ public class Calc {
             case '/':
             case '^':
             case '!':
+            case '%':
                 return true;
         }
         return false;
@@ -109,6 +117,10 @@ public class Calc {
      * @return double result
      */
     public static double calculate(String sIn) throws CalcException {
+        if(sIn.trim().length() == 0){
+            throw new CalcException("введена пустая строка ");
+        }
+
         double dA, dB;
         String sTmp;
         Deque<Double> stack = new ArrayDeque<>();
@@ -116,14 +128,18 @@ public class Calc {
         while (st.hasMoreTokens()) {
             try {
                 sTmp = st.nextToken().trim();
+
                 if (1 == sTmp.length() && isOp(sTmp.charAt(0))) {
-                    if (stack.size() < 2) {
+                    if ((stack.size() < 2 && sTmp.charAt(0) != '!') || (sTmp.charAt(0) == '!' && stack.size() < 1) ) {
                         throw new CalcException("Неверное количество данных в стеке для операции " + sTmp);
                     }
                     dB = stack.pop();
-                    dA = stack.pop();
+                    dA = 0.0;
+                    if(sTmp.charAt(0) != '!'){
+                        dA = stack.pop();
+                    }
                     // Считываем первый символ
-                    switch (sTmp.charAt(1)) {
+                    switch (sTmp.charAt(0)) {
                         case '+':
                             dA += dB;
                             break;
@@ -143,14 +159,19 @@ public class Calc {
                             dA = Math.pow(dA, dB);
                             break;
                         case '!':
-                            throw new UnsupportedOperationException("TODO: Не забыть реализовать оператор !");
+                            dA = factorial((long)dB);
+                            break;
                         default:
                             throw new CalcException("Недопустимая операция " + sTmp);
                     }
                     stack.push(dA);
                 } else {
-                    dA = Double.parseDouble(sTmp);
-                    stack.push(dA);
+                    try {
+                        dA = Double.parseDouble(sTmp);
+                        stack.push(dA);
+                    } catch (NumberFormatException e) {
+                        throw new CalcException("Символ не является числом");
+                    }
                 }
             } catch (CalcException e) {
                 throw new CalcException("Недопустимый символ в выражении");
@@ -162,5 +183,18 @@ public class Calc {
         }
 
         return stack.pop();
+    }
+
+    public static long factorial(long n) {
+        if (n == 0 || n == 1) {
+            return 1;
+        }
+
+        long result = 1;
+        for (int i = 2; i <= n; i++) {
+            result *= i;
+        }
+
+        return result;
     }
 }

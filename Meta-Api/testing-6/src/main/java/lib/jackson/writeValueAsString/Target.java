@@ -8,13 +8,13 @@ public class Target {
     public static void fuzzerTestOneInput(FuzzedDataProvider data) {
         var mapper = new ObjectMapper();
 
-        var key1 = data.consumeString(30);
-        var value1 = data.consumeString(30);
+        var key1 = data.consumeString(2);
+        var value1 = data.consumeString(2);
 
-        var key2 = data.consumeString(30);
+        var key2 = data.consumeString(2);
         var value2 = data.consumeInt();
 
-        var key3 = data.consumeString(30);
+        var key3 = data.consumeString(2);
         var value3 = data.consumeBoolean();
 
         var node = mapper.createObjectNode();

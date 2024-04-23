@@ -1,0 +1,7 @@
+{"menu": {
+  "id": "file",
+  "value": "File",
+  "popup": {
+    "menuiteM": [
+      {"value": "New", "onclick": "CrDoc()"}
+    ]java.}}

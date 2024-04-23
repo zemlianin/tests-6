@@ -1,0 +1,7 @@
+{"menu": {
+  "id": "file",
+  "popup": "File",
+  "popup": {
+    "menue": "New", "onclick": "Creat,
+      {ÿÿÿÿÿÿÿÿ*wDoc()"},
+      {"value": "

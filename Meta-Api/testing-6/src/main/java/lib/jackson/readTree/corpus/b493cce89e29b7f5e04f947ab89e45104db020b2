@@ -1,0 +1,7 @@
+{"menu": "file",
+  "value": "File",
+  "pem": [
+      {"value": "New", "oáclick": "seDoc()"}
+    ],  }
+ }
+}}
